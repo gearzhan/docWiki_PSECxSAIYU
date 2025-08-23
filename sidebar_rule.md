@@ -1,48 +1,51 @@
-# Docsify _sidebar.md Authoring Rules
+Docsify Sidebar Rules
 
-Files referenced:
-- /Users/gearzhan/cProjects/docWiki/index.html
-- /Users/gearzhan/cProjects/docWiki/docs/_sidebar.md
+1. _sidebar.md file
+	•	The sidebar is controlled by a file named _sidebar.md.
+	•	Place one in the ./docs/ for a global sidebar.
+⸻
+2. Links and file extensions
+	•	In _sidebar.md, you normally link to Markdown files (.md).
+Example:
 
-1) Location and enabling
-- Place the sidebar file at docs/_sidebar.md.
-- Ensure sidebar loading is enabled in index.html: set loadSidebar: true.
-- To reuse a single sidebar across all routes, set alias: { '/.*/_sidebar.md': '/_sidebar.md' } in window.$docsify.
+- [Quick Start](getting-started/quickstart.md)
 
-2) Structure and depth
-- Organize links by sections (e.g., Getting Started, Documentation, Resources).
-- Keep the hierarchy shallow: at most two levels (section -> page -> optional page headings via subMaxLevel).
-- Prefer stable slugs: use folder/README.md as a landing page for a section.
+	•	Docsify lets you omit .md in the link:
 
-3) Link patterns
-- Root home: [Home](/)
-- Same-folder pages: [Guide](guide.md)
-- Nested pages: [Getting Started](tutorials/getting-started.md)
-- You may append a custom title for SEO: [Guide](guide.md "The greatest guide in the world")
+- [Quick Start](getting-started/quickstart)
 
-4) Auto-generated table of contents (TOC)
-- Control TOC depth via subMaxLevel in index.html (e.g., subMaxLevel: 2).
-- Hide a specific header from TOC by appending: <!-- {docsify-ignore} -->
-- Hide all headers on a page from TOC using: <!-- {docsify-ignore-all} --> on the first header of that page.
+Both will work.
 
-5) Example template for docs/_sidebar.md
+	•	Best practice: omit .md for cleaner links, especially if you might later change file extensions or use routing.
 
-- Getting Started
-  - [Home](/)
-  - [User Guide](guide/README.md)
-- Documentation
-  - [Tutorials](tutorials/getting-started.md)
-  - [API Reference](api/README.md)
-- Resources
-  - [About Project](about/about.md)
-  - [FAQ](faq/README.md)
+⸻
 
-6) Notes for this project
-- index.html uses basePath: '/docs/', so links like [Home](/) correctly resolve to docs/README.md.
-- The alias { '/.*/_sidebar.md': '/_sidebar.md' } (relative to basePath) ensures a single sidebar file is used across all routes.
+3. README.md as default page
+	•	Each folder can have a README.md, and Docsify treats it as the default page for that folder.
+	•	If you link only to the folder, Docsify automatically loads README.md.
 
-7) Maintenance tips
-- Keep section names concise; avoid more than ~7 items per section for readability.
-- Use consistent casing and titles to match page H1s.
-- Validate links after moving or renaming files; broken links degrade UX.
-- Prefer meaningful ordering (onboarding → core → references → resources).
+Example:
+
+- [Getting Started](getting-started/)
+
+→ will display getting-started/README.md.
+
+	•	So: you don’t need to link README.md explicitly. Just point to the folder, and Docsify knows to show it.
+
+
+⸻
+
+4. Hierarchy (indentation)
+	•	Use indentation in _sidebar.md to create nested menus.
+  •	Root level heading (no link) is first level folder name 
+	•	max level 2
+
+Example:
+
+- [Home](/)
+- Policies // Root level heading (no link) is first level folder name 
+  - [Company Policies](01-policies/company-policies)
+  - [Safety Guidelines](01-policies/safety-guidelines)
+- Commercial // Root level heading (no link) is first level folder name 
+  - [Commercial Policies](02-commercial/commercial-policies)
+

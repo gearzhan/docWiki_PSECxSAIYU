@@ -62,7 +62,26 @@
     └── tutorials/getting-started.md
 ```
 
+## 本地开发
+
+### 安装 Docsify CLI
+首次使用需要全局安装 docsify-cli：
+```bash
+npm install -g docsify-cli
+```
+### 启动本地服务器
+在项目根目录执行以下命令启动本地开发服务器：
+```bash
+docsify serve .
+docsify serve . --port 8080 # 启动本地服务器，默认端口为 3000
+nohup docsify serve . & # 在后台运行
+```
+
+### 开发提示
+- 修改 `docs/` 目录下的 Markdown 文件后，浏览器会自动刷新显示最新内容
+- 修改 `index.html` 配置文件后，需要手动刷新浏览器
+
 ## 文档编写提示
 - 侧边栏编写规范请参阅根目录 `sidebar_rule.md`；
 - 因 `basePath` 为 `/docs/`，文内链接如 `[Home](/)` 会指向 `docs/README.md`；
-- Mermaid 示例与语法参考可见 `docs/README.md` 与 `docs/guide/README.md`。
+

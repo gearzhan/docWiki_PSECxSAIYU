@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
   <meta name="description" content="">
   <title>docWiki</title>
+  <title>PSEC x SAIYU</title>
   <!-- Themes (light + dark) -->
   <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
   <link rel="stylesheet" media="(prefers-color-scheme: light)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
@@ -78,6 +79,7 @@
     .theme-switch input:checked + .switch-label .slider::after { transform: translateX(16px); }
   </style>
 </head>
+
 <body>
   <div id="app">Loading...</div>
 
@@ -93,11 +95,11 @@
 
   <script>
     window.$docsify = {
-      name: 'docWiki',
       basePath: '/docs/',
+      name: 'PSEC x SAIYU @docWiki.js@',
       loadSidebar: true,
       alias: { '/.*/_sidebar.md': '/_sidebar.md' },
-      subMaxLevel: 2,
+      subMaxLevel: 3,
       auto2top: true,
       search: { noData: 'No results found', paths: 'auto', placeholder: 'search...' },
       mermaidConfig: { querySelector: '.mermaid' } // 中文注释：docsify-mermaid 查询选择器

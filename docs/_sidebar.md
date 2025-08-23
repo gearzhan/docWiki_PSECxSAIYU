@@ -1,4 +1,3 @@
-**PSEC x SAIYU @docWiki.js**
 - [Home](/)
 - [Getting Started](getting-started)
 - Policies
