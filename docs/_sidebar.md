@@ -3,6 +3,7 @@
 - Policies
   - [Overview](01-policies/)
   - [Revision Management](01-policies/RevisionManagement)
+  - [Filing Management](01-policies/FilingManagement)
 - Commercial
   - [Overview](02-commercial/)
   - [Construction Contract Explained](02-commercial/ConstructionContractExplained)
@@ -11,7 +12,11 @@
 - Processes
   - [Overview](03-processes/)
 - Procedures
-  - [BuiderTrend-Maintain POs and Bills](04-procedures/buildertrend/MaintainPOsBills)
+  - [Google Contacts](04-procedures/googleservice/GoogleContacts)
+  - [Google Search 101](04-procedures/googleservice/GoogleSearch)
+  - [BT-Invoices,POs,Bills](04-procedures/buildertrend/BT-Workflow-Invoices-Bills-POs)
+  - [BT-Subcontracting and Budget Management](04-procedures/buildertrend/BT-Workflow-Subcontracting-Budget)
+  - [FW-Guide for PSEC](04-procedures/fieldwire/PSEC_FieldwireGuide)
 - Quality
   - [Overview](05-quality/)
 - Safety

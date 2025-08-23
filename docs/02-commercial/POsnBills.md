@@ -68,7 +68,6 @@ end
   - It's possible to create a bill and link an invoice without marking it as **"Ready for Payment"**, but this means the invoice has **not** been fully reviewed and approved yet. e.g. pending for a signed docket.
 
 > for invoice managment, more details refer to [Procedure for Filing Invoices](/Sub-Contract/IncomingInvoices)
-{.is-info}
 
 
 ### Summary

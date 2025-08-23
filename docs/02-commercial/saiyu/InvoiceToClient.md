@@ -21,7 +21,7 @@ flowchart LR
 subgraph SAIYU
   subgraph BT[Buidlertrend]
     TS[Time Sheets] -.-> CI{"Draft Client Invoice"}
-    PO[Purchase Order] -..-> CI
+    PO[Purchase Order] -.-> CI
   end
 
   subgraph Xero
@@ -34,14 +34,9 @@ subgraph CLIENT
  AP[Accounts Payable]
 end
 
-
 CI --> CIx --> AP
 
-
 ```
-
-
----
 
 ## 1. Lump Sum Contract
 
