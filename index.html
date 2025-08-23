@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
+  <meta name="description" content="">
+  <title>docWiki</title>
+  <!-- Themes (light + dark) -->
+  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+  <link rel="stylesheet" media="(prefers-color-scheme: light)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+
+  <style>
+    .sidebar { color: var(--theme-color, #42b983); }
+    /* Sidebar compact styles */
+    .sidebar-nav { padding: 0 !important; }
+    .sidebar-nav ul { margin: 0 !important; padding: 0 !important; }
+    .sidebar-nav li { margin: 0 !important; padding: 2px 0 !important; line-height: 1.2 !important; }
+    .sidebar-nav li p { margin: 4px 0 2px 8px !important; padding: 0 !important; font-weight: bold; font-size: 14px; }
+    .sidebar-nav li a { padding: 2px 0 2px 16px !important; margin: 0 !important; display: block; font-size: 13px; line-height: 1.3; }
+    .sidebar-nav .app-sub-sidebar { padding-left: 8px !important; }
+    .sidebar-nav .app-sub-sidebar li a { padding-left: 24px !important; font-size: 12px; }
+    .sidebar-nav .section-link { padding-left: 32px !important; }
+
+    /* Mermaid dark theme optimization */
+    @media (prefers-color-scheme: dark) {
+      .mermaid { background-color: transparent !important; }
+      .mermaid svg { background-color: transparent !important; }
+      .mermaid .node rect,
+      .mermaid .node circle,
+      .mermaid .node ellipse,
+      .mermaid .node polygon { stroke: #ffffff !important; stroke-width: 2px !important; }
+      .mermaid .edgePath path { stroke: #ffffff !important; stroke-width: 2px !important; }
+      .mermaid .edgeLabel { background-color: #1e1e1e !important; color: #ffffff !important; }
+      .mermaid .cluster rect { stroke: #bb86fc !important; stroke-width: 2px !important; }
+    }
+
+    /* Theme switch (bottom-left) */
+    .theme-switch { /* 中文注释：主题开关容器（固定左下角） */
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 9999;
+      user-select: none;
+    }
+    .theme-switch input { display: none; }
+    .theme-switch .switch-label { /* 中文注释：开关主体样式 */
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      backdrop-filter: blur(6px);
+    }
+    .theme-switch .icon { font-size: 12px; line-height: 1; }
+    .theme-switch .txt { /* 中文注释：文字标签样式 */ font-size: 12px; line-height: 1; text-transform: lowercase; }
+    .theme-switch .slider { /* 中文注释：滑块轨道 */
+      position: relative;
+      width: 34px; height: 18px;
+      background: #ccc;
+      border-radius: 999px;
+      transition: background .2s ease;
+    }
+    .theme-switch .slider::after { /* 中文注释：滑块圆点 */
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    }
+    .theme-switch input:checked + .switch-label .slider { background: #4caf50; }
+    .theme-switch input:checked + .switch-label .slider::after { transform: translateX(16px); }
+  </style>
+</head>
+<body>
+  <div id="app">Loading...</div>
+
+  <!-- Light/Dark Theme Toggle (Switch) -->
+  <div class="theme-switch" aria-label="Theme switch">
+    <input type="checkbox" id="themeToggle" />
+    <label for="themeToggle" class="switch-label" aria-hidden="true">
+      <span class="txt light">light</span>
+      <span class="slider"></span>
+      <span class="txt dark">dark</span>
+    </label>
+  </div>
+
+  <script>
+    window.$docsify = {
+      name: 'docWiki',
+      basePath: '/docs/',
+      loadSidebar: true,
+      alias: { '/.*/_sidebar.md': '/_sidebar.md' },
+      subMaxLevel: 2,
+      auto2top: true,
+      search: { noData: 'No results found', paths: 'auto', placeholder: 'search...' },
+      mermaidConfig: { querySelector: '.mermaid' } // 中文注释：docsify-mermaid 查询选择器
+    };
+  </script>
+
+  <!-- Required -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+
+  <!-- Mermaid support (UMD to ensure window.mermaid is ready for docsify-mermaid) -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    // 检测手动覆盖或系统主题
+    const storedTheme = localStorage.getItem('preferred-theme');
+    const isDarkMode = storedTheme ? (storedTheme === 'dark') : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    /**
+     * 中文注释：按主题初始化 Mermaid
+     * @param {boolean} dark 是否暗色主题
+     */
+    function initMermaidWithTheme(dark) { // 中文注释：按主题初始化 Mermaid
+      const config = {
+        startOnLoad: true,
+        theme: dark ? 'dark' : 'default',
+        themeVariables: dark ? {
+          primaryColor: '#bb86fc',
+          primaryTextColor: '#ffffff',
+          primaryBorderColor: '#ffffff',
+          lineColor: '#ffffff',
+          secondaryColor: '#03dac6',
+          tertiaryColor: '#121212',
+          background: '#1e1e1e',
+          mainBkg: '#2d2d2d',
+          secondBkg: '#3d3d3d',
+          tertiaryBkg: '#4d4d4d'
+        } : {
+          primaryColor: '#0366d6',
+          primaryTextColor: '#000000',
+          primaryBorderColor: '#0366d6',
+          lineColor: '#333333',
+          secondaryColor: '#f6f8fa',
+          tertiaryColor: '#ffffff'
+        }
+      };
+      window.mermaid.initialize(config);
+    }
+
+    // 初始化 Mermaid
+    initMermaidWithTheme(isDarkMode);
+
+    // 监听系统主题变化（当无手动覆盖时）
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mq.addEventListener('change', (e) => {
+      if (localStorage.getItem('preferred-theme')) return; // 有手动覆盖则忽略
+      initMermaidWithTheme(e.matches);
+      document.querySelectorAll('.mermaid').forEach(el => el.removeAttribute('data-processed'));
+      window.mermaid.init(undefined, '.mermaid');
+    });
+  </script>
+
+  <!-- 手动主题切换逻辑：覆盖样式表 media 并重渲染 Mermaid -->
+  <script>
+    /**
+     * 中文注释：获取当前生效主题
+     * @returns {('light'|'dark')} 主题
+     */
+    function getCurrentTheme() { // 中文注释：获取当前生效主题
+      const override = localStorage.getItem('preferred-theme');
+      if (override === 'dark' || override === 'light') return override;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    /**
+     * 中文注释：应用目标主题（切换样式表 media 并持久化）
+     * @param {('light'|'dark')} theme 目标主题
+     */
+    function applyTheme(theme) { // 中文注释：应用目标主题
+      const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+      const darkLink = links.find(l => l.href && l.href.includes('theme-simple-dark.css'));
+      const lightLink = links.find(l => l.href && l.href.includes('theme-simple.css') && !l.href.includes('dark'));
+      if (darkLink && lightLink) {
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          darkLink.media = 'not all';
+          lightLink.media = 'all';
+        }
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('preferred-theme', theme);
+      setToggleUI();
+      reinitMermaid(theme === 'dark');
+    }
+
+    /**
+     * 中文注释：根据当前主题更新开关状态
+     */
+    function setToggleUI() { // 中文注释：根据当前主题更新开关状态
+      const checkbox = document.getElementById('themeToggle');
+      const cur = getCurrentTheme();
+      checkbox.checked = (cur === 'dark');
+      const label = document.querySelector('label[for="themeToggle"]');
+      if (label) label.title = 'Switch to ' + (cur === 'dark' ? 'Light' : 'Dark') + ' theme';
+    }
+
+    /**
+     * 中文注释：根据主题重置 Mermaid 配置并重渲染
+     * @param {boolean} dark 是否暗色
+     */
+    function reinitMermaid(dark) { // 中文注释：根据主题重置 Mermaid 配置并重渲染
+      function doInit() {
+        if (!window.mermaid) { setTimeout(doInit, 100); return; }
+        initMermaidWithTheme(dark);
+        document.querySelectorAll('.mermaid').forEach(el => el.removeAttribute('data-processed'));
+        window.mermaid.init(undefined, '.mermaid');
+      }
+      doInit();
+    }
+
+    // 切换开关事件（中文注释：处理主题切换）
+    document.getElementById('themeToggle').addEventListener('change', function(e) {
+      const newTheme = e.target.checked ? 'dark' : 'light'; // 中文注释：根据开关状态确定新主题
+      applyTheme(newTheme);
+      setTimeout(() => window.location.reload(), 50); // 中文注释：持久化后强制刷新一次页面
+    });
+
+    // 初始化：若有覆盖则应用，否则仅设置开关状态（中文注释）
+    (function initThemeToggle() {
+      const override = localStorage.getItem('preferred-theme');
+      if (override === 'dark' || override === 'light') {
+        applyTheme(override);
+      } else {
+        setToggleUI();
+      }
+    })();
+  </script>
+
+  <!-- Docsify Mermaid plugin -->
+  <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
+
+</body>
+</html>
