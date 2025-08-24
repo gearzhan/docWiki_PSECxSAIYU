@@ -10,33 +10,40 @@ This document outlines the end-to-end procedure for managing invoices, from init
 
 ### 2.1. Receiving Invoices
 
-#### From Gmail Inbox
-- **Responsible:** Accounts Assistant
-- **Action:**
-  - Daily, apply the label `Invoices-to-SAIYU` to all incoming invoices.
-  - Do not **delete** original emails.
+All invoices must be centralized in the accounting inbox for processing.
 
-#### From Other Sources (e.g., message, physical mail)
-- **Responsible:** All Staff
-- **Action:**
-	- **Digital invoices**: Forward to `ca@saiyu.com.au` and `cc: accountant@saiyu.com.au`.
-	- **Physical invoices**: Scan and email to `ca@saiyu.com.au` and `cc: accountant@saiyu.com.au`.
+-   **Centralizing Invoices (All Staff):**
+    -   **For Digital Invoices:** Apply the shared Gmail label `Invoices-to-SAIYU` or `Invoices-to-PSEC`. This automatically notifies the accounting team. **Do not forward the email.**
+    -   **For Physical Invoices:** Scan the document, and email to `(SAIYU) accountant@saiyu.com.au` or `(PSEC) sywang@psecprojects.com.au`
+    -   Ensure the Project Manager is included on all invoice-related emails.
+    -   Do not delete the original emails.
 
-### 2.2. Classifying Invoices
+-   **Review (Accounts Assistant):**
+    -   The Accounts Assistant is responsible for monitoring the `Invoices-to-SAIYU` and `Invoices-to-PSEC` labels and processing the invoices found there.
 
-Before processing, identify the nature of the invoice.
+### 2.2. PSEC-Classifying Invoices
+
+For PSEC, invoices often relate to project disbursements and require careful handling:
+
+-   **Nature of Invoices:** Most are reimbursement invoices for costs incurred on behalf of the client (e.g., consultant fees).
+-   **Process:** Depending on the project agreement, PSEC may pay these invoices and seek reimbursement, or forward them to the client for direct payment.
+-   **Verification:** **Always** confirm the correct procedure with `Sunny` before filing, as the process is project-specific.
+
+### 2.3. SAIYU-Classifying Invoices
+
+For SAIYU, Before processing, identify the nature of the invoice.
 
 - **Accounts-Related Invoices:** Monthly or fortnightly accounts (e.g., labor hire).
-- **Main Sub-Contractors’ Invoices:** Lump sum, unit price (rate), or variation work.
+- **Sub-Contractors’ Invoices:** Lump sum, unit price (rate), or variation work.
 - **One-Off Trades/Subcontractors:** Specialized services not covered under main contracts.
 - **Card Payments:** Fees, council charges, one-off purchases.
 - **Cash Payments:** Consult with the Account Manager (**Sunny**) for guidance.
 
-> **Note:** If a company is not on the [Accounts & Labour Company List](11-assets/saiyu_AccountsList.md), classify it as a Main Sub-Contractor or One-Off Trade. For new subcontractors, consult with the Director (**Gear**).
+> **Note:** If a company is not on the [Accounts & Labour Company List](11-assets/saiyu_AccountsList.md), classify it as a Sub-Contractor or One-Off Trade. For new subcontractors, consult with the Director (**Gear**).
 
 ## 3. Stage 2: Invoice Review and Verification
 
-- **Responsible:** CA (Contract Admin)
+- **Responsible:** CA (Contract Admin), Account Manager
 - **Action:** Review each invoice using the checklist below.
 
 **Invoice Review Checklist**
@@ -65,7 +72,7 @@ Before processing, identify the nature of the invoice.
     - **Title:** Should reflect the invoice specifics.
     - **Attachment:** Attach the invoice document.
 
-## 5. Stage 4: Scenario-Based Processing and Approvals
+## 5. Stage 4: Scenario-Based Processing and Approvals (SAIYU)
 
 ### 5.1. Scenario-Based Processing
 
@@ -92,10 +99,9 @@ Before processing, identify the nature of the invoice.
 ## 6. Reporting and Resources
 
 - **Abnormal Activities:** Report any unusual activities with detailed documentation.
-- **Feedback on Procedure:** Send suggestions to `gzhan@saiyu.com.au`.
-- **Buildertrend Training:** Access materials via the [Buildertrend Help Center](https://help.buildertrend.net/).
-- **Archived Files:** For files prior to 2024, contact `gzhan@saiyu.com.au`.
-- **IT Support:** Email `gzhan@saiyu.com.au` for technical issues.
+- **Buildertrend Training:** Access materials via the [Buildertrend Help Center](https://helpcenter.buildertrend.net/en/).
+- **Archived Files:** For files prior to 2024, contact Gear Zhan.
+- **IT Support:** Email Gear for technical issues.
 
 ---
 

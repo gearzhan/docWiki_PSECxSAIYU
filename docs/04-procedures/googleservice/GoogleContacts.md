@@ -87,6 +87,8 @@ If company is NOT known:
 
 ## Contracts Archive
 
+!>Right click to download.
+
 [Contacts_Archive_rev2025.01.a.csv](/docs/11-assets/saiyu_contacts_archive_rev2025.01.a.csv ':ignore')
 
 [Contacts_Archive_rev2024.11.a.csv](/docs/11-assets/saiyu_contacts_archive_rev2025.01.a.csv ':ignore')

@@ -111,7 +111,7 @@ BL o--relay-----o B4
 -   **Bids Panel:** Records tender details from subcontractors. Approved bids should be reflected in the budget via a **Change Order**, not by editing the estimate.
 -   **Job Costing Budget Panel:** The central hub for tracking financial updates. It is independent of the Estimate Panel and provides clarity on awarded contract value (**Committed Cost**) and work completed (**Actual Cost**).
 
-> For a detailed discussion on Purchase Orders and Bills, refer to [Procedure for Managing Invoices, POs, and Bills in Buildertrend](/docs/04-procedures/buildertrend/BT-Workflow-Invoices-Bills-POs.md).
+> For a detailed discussion on Purchase Orders and Bills, refer to [Procedure for Managing Invoices, POs, and Bills in Buildertrend](04-procedures/buildertrend/BT-Workflow-Invoices-Bills-POs.md).
 
 ---
 
