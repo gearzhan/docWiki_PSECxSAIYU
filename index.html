@@ -37,10 +37,10 @@
     }
 
     /* Theme switch (bottom-left) */
-    .theme-switch { /* 中文注释：主题开关容器（固定右上角） */
+    .theme-switch { /* 中文注释：主题开关容器（固定左下角） */
       position: fixed;
-      right: 16px;
       top: 16px;
+      right: 16px;
       z-index: 9999;
       user-select: none;
     }
@@ -96,10 +96,9 @@
   <script>
     window.$docsify = {
       basePath: '/docs/',
-      name: 'PSEC x SAIYU @docWiki.js@',
       loadSidebar: true,
       alias: { '/.*/_sidebar.md': '/_sidebar.md' },
-      subMaxLevel: 3,
+      subMaxLevel: 2,
       auto2top: true,
       search: { noData: 'No results found', paths: 'auto', placeholder: 'search...' },
       mermaidConfig: { querySelector: '.mermaid' } // 中文注释：docsify-mermaid 查询选择器
@@ -111,16 +110,10 @@
   <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
   <!-- Mermaid support (UMD to ensure window.mermaid is ready for docsify-mermaid) -->
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true });
-  window.mermaid = mermaid;
-</script>
-
-<script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
     // 检测手动覆盖或系统主题
     const storedTheme = localStorage.getItem('preferred-theme');
     const isDarkMode = storedTheme ? (storedTheme === 'dark') : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -249,7 +242,6 @@
 
   <!-- Docsify Mermaid plugin -->
   <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
-  <script src="//unpkg.com/docsify-mermaid-zoom/dist/docsify-mermaid-zoom.js"></script>
 
 </body>
 </html>
