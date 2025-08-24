@@ -1,4 +1,11 @@
 # Revision Description Format and Management
+---
+<p style="text-align:right">Date: 23.08.2025 | Revision: 2025.08.a</p>
+
+
+## for PSEC issued Drawing
+
+## for any other document
 
 Revisions are recorded using the following format:
 

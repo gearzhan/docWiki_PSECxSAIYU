@@ -10,7 +10,7 @@ flowchart TB
     X o--'RELATED'--o Y
     Y x--'RELATED'--x Z
        
-  end
+end
 
 ```
 

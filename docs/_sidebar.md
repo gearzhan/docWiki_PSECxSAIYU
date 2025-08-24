@@ -1,0 +1,28 @@
+- **Wellcome**
+- [Home](/)
+- [Getting Started](getting-started)
+- Policies
+  - [Revision Management](01-policies/RevisionManagement)
+  - [Filing Management](01-policies/FilingManagement)
+- Commercial
+  - [Construction Contract Explained](02-commercial/ConstructionContractExplained)
+  - [POs and Bills](02-commercial/POsnBills)
+  - [SAIYU-Invoice to Client](02-commercial/saiyu/InvoiceToClient)
+- Procedures
+  - [Google Contacts](04-procedures/googleservice/GoogleContacts)
+  - [Google Search 101](04-procedures/googleservice/GoogleSearch)
+  - [BT-Invoices,POs,Bills](04-procedures/buildertrend/BT-Workflow-Invoices-Bills-POs)
+  - [BT-Subcontracting and Budget Management](04-procedures/buildertrend/BT-Workflow-Subcontracting-Budget)
+  - [FW-Fieldwire Guide](04-procedures/fieldwire/FieldwireGuide)
+  - [FW-Guide for PSEC](04-procedures/fieldwire/PSEC_FieldwireGuide)
+
+- **Knowledge Base**
+- Development
+  - [Developement Flowchat](07-knowledge-base/dev/DevelopmentFlow)
+  - [Fire CC Process - Class 1](07-knowledge-base/dev/Class1Building_FireCCprocess)
+  - [Fire Indicator Panels (FIPs)](07-knowledge-base/dev/FIP)
+- Technical
+  - [Importing aluminium window](07-knowledge-base/technical/alumnWindows)
+- Geeks
+  - [Cloudfare Tunnel](07-knowledge-base/geeks/CloudflareTunnelsAndReverseProxy)
+  - [Markdown 101](07-knowledge-base/geeks/Markdown101)
