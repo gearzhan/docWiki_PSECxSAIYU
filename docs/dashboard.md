@@ -31,3 +31,4 @@
 - [ChatGPT](https://chatgpt.com/)
 - [Google NotebookLM](https://notebooklm.google.com/)
 - [Perplexity](https://www.perplexity.ai/)
+- [Fieldwire](https://app.fieldwire.com/#!/auth/sign_in?lang=en) `acc: fieldwire@psecprojects.com.au` `p/w: psec0258`
