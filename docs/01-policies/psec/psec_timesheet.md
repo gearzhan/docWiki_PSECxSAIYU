@@ -2,7 +2,7 @@
 
 - [Timesheets](http://psec.saiyu.com.au/)
 
-Defalt Acc. `youremail`
+Default Acc. `youremail`
 P/W : `02580258`
 
 | Task ID   | Task Name                | Description                                                              | Category       |
