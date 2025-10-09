@@ -11,6 +11,9 @@
   <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
   <link rel="stylesheet" media="(prefers-color-scheme: light)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
 
+  <!-- Wikilink Graph View Styles -->
+  <link rel="stylesheet" href="/docs/assets/css/wikilink-graph.css">
+
   <style>
     .sidebar { color: var(--theme-color, #42b983); }
     /* Sidebar compact styles */
@@ -92,6 +95,11 @@
       <span class="txt dark">dark</span>
     </label>
   </div>
+
+  <!-- Graph View Toggle Button -->
+  <button class="graph-toggle-btn" onclick="showWikilinkGraph()" aria-label="Show graph view">
+    Graph View
+  </button>
 
   <script>
     window.$docsify = {
@@ -242,6 +250,13 @@
 
   <!-- Docsify Mermaid plugin -->
   <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
+
+  <!-- Wikilink Graph View -->
+  <script src="/docs/assets/js/wikilink-graph-scanner.js"></script>
+  <script src="/docs/assets/js/wikilink-graph-view.js"></script>
+
+  <!-- Wikilinks support -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-wikilink@1"></script>
 
 </body>
 </html>

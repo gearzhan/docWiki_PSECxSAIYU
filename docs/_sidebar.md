@@ -25,6 +25,7 @@
   - [Developement Flowchat](07-knowledge-base/dev/DevelopmentFlow)
   - [Fire CC Process - Class 1](07-knowledge-base/dev/Class1Building_FireCCprocess)
   - [Fire Indicator Panels (FIPs)](07-knowledge-base/dev/FIP)
+  - [WHS](07-knowledge-base/Vault/Sample%20Vault/This%20a%20sample%20Vault%20for%20Testing)
 - Technical
   - [Importing aluminium window](07-knowledge-base/technical/alumnWindows)
 - Geeks

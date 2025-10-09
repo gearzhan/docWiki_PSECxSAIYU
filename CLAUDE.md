@@ -2,218 +2,221 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Type: Knowledge Management System
+## Project Overview
 
-**IMPORTANT: This is NOT a programming project.**
-
-This repository is a **unified knowledge base** for two companies:
-- **SAIYU Construction** (Building Services)
-- **PSEC Project Services** (Architectural Services)
-
-### Primary Purpose
-Maintain a well-structured wiki database with clear hierarchy, consistent filing systems, and professional documentation in Markdown format.
-
-### Working Principles
-- **DO NOT generate code solutions** unless explicitly requested
-- **DO NOT modify `index.html`** unless explicitly requested
-- Focus on content structure, naming conventions, and documentation quality
-- Treat this as a knowledge management project, not a software development project
-
-## Technical Stack
-
-This wiki uses Docsify for presentation:
-- **Docsify 4**: Front-end Markdown renderer (no build required)
-- **docsify-themeable**: Light/Dark theme support with system preference detection
-- **Mermaid 10**: Diagram rendering (UMD version for compatibility)
-- **Deployment**: Vercel with SPA rewrites
-
-## Local Development
-
-### Starting the server
-```bash
-# Install docsify-cli globally (first time only)
-npm install -g docsify-cli
-
-# Start local server (default port 3000)
-docsify serve .
-
-# Custom port
-docsify serve . --port 8080
-
-# Background mode
-nohup docsify serve . &
-```
-
-### Development workflow
-- Markdown file changes in `docs/` auto-refresh in browser
-- Changes to `index.html` require manual browser refresh
-- No build step required
+**docWiki** is a Docsify-based documentation website for PSEC Project Services and SAIYU Construction. It serves as an internal wiki containing company policies, procedures, commercial workflows, and technical knowledge base. The site uses client-side Markdown rendering without a build step.
 
 ## Architecture
 
-### File Structure
+### Technology Stack
+- **Framework**: Docsify 4 (client-side Markdown rendering)
+- **Theme**: docsify-themeable (supports light/dark mode switching)
+- **Diagramming**: Mermaid 10 (UMD build) with docsify-mermaid plugin
+- **Wikilinks**: docsify-wikilink plugin for Obsidian-style [[page]] syntax
+- **Graph Visualization**: D3.js v7 for force-directed graph view
+- **Deployment**: Vercel (SPA routing via vercel.json)
+
+### Key Files
+- `index.html` - Main entry point containing all Docsify configuration, theme loading, and custom theme switching logic
+- `docs/` - All documentation content (Markdown files)
+- `docs/_sidebar.md` - Global sidebar navigation (aliased for all routes)
+- `docs/assets/js/wikilink-graph-scanner.js` - Scans pages for wikilinks and builds graph data
+- `docs/assets/js/wikilink-graph-view.js` - D3.js force-directed graph visualization
+- `docs/assets/css/wikilink-graph.css` - Graph view styling (theme-aware)
+- `sidebar_rule.md` - Documentation for sidebar authoring conventions
+- `vercel.json` - SPA rewrite rules for deployment
+
+### Configuration Details
+
+**Docsify Config** (in `index.html`):
+```javascript
+window.$docsify = {
+  basePath: '/docs/',           // 文档根目录指向 docs/
+  loadSidebar: true,             // 启用侧边栏
+  alias: { '/.*/_sidebar.md': '/_sidebar.md' },  // 所有路由共用根侧边栏
+  subMaxLevel: 2,                // 目录展开最大层级
+  auto2top: true,
+  search: { paths: 'auto' },     // 全文检索
+  mermaidConfig: { querySelector: '.mermaid' }
+}
 ```
-/ (root)
-├── index.html              # Docsify config, theme setup, Mermaid integration
-├── docs/                   # All documentation content
-│   ├── README.md           # Homepage/Dashboard
-│   ├── _sidebar.md         # Global sidebar (2-level max)
-│   ├── getting-started.md  # Onboarding guide
-│   ├── 01-policies/        # Internal policies (HSE, QA, IT)
-│   ├── 02-commercial/      # Procurement, progress claims
-│   ├── 04-procedures/      # Step-by-step workflows
-│   │   ├── buildertrend/
-│   │   ├── fieldwire/
-│   │   └── googleservice/
-│   ├── 05-quality/         # Inspection guides, ITPs
-│   ├── 06-safety/          # SWMS, risk matrix
-│   ├── 07-knowledge-base/  # FAQs, glossary, standards
-│   │   ├── dev/            # Development processes
-│   │   ├── technical/      # Technical references
-│   │   └── geeks/          # Tech tools & tips
-│   ├── 08-templates/       # Reusable forms
-│   └── 11-assets/          # Images, diagrams
-├── sidebar_rule.md         # Sidebar authoring guidelines
-└── vercel.json             # SPA routing config
+
+**Theme Switching**:
+- Manual light/dark theme toggle in top-right corner
+- Theme preference stored in `localStorage` as `preferred-theme`
+- Manual override takes precedence over system preference
+- Theme changes trigger Mermaid re-initialization with theme-specific colors
+- Page auto-reloads after manual theme switch for full style application
+
+**Mermaid Integration**:
+- Uses UMD version loaded before docsify-mermaid plugin to ensure `window.mermaid` availability
+- Theme-specific initialization with custom color variables
+- Dark theme uses enhanced contrast colors for better readability
+- Automatic re-rendering on theme changes
+
+**Wikilinks & Graph View**:
+- **Wikilink Syntax**: `[[Page Name]]` or `[[Page Name|Display Text]]` (Obsidian-style)
+- **Graph Scanner**: Automatically parses pages for wikilinks on navigation
+- **Scoped Scanning**: Graph view limited to specific folders (configurable in `wikiGraphConfig`)
+- **Default Scope**: Only scans `docs/07-knowledge-base/Vault/` folder
+- **Graph Data Structure**: Stored in `window.wikiGraphData` with nodes and links
+- **Force-Directed Layout**: D3.js simulation with drag, zoom, and click-to-navigate
+- **Theme-Aware Colors**: Graph colors adapt to light/dark theme automatically
+- **Node Sizing**: Node radius scales with number of connections (8-20px)
+- **Category Colors**: Different colors based on document folder (policies, commercial, etc.)
+- **Dynamic Button**: "Graph View" button only visible within scoped folders
+- **Auto-Clear**: Graph data cleared when navigating outside scope
+- **Keyboard Shortcut**: ESC key closes graph view
+- **Lazy Loading**: D3.js only loads when graph is first opened
+- **Sample Data**: Test with `/docs/07-knowledge-base/Vault/Sample Vault/` files
+
+## Content Structure
+
+### Directory Organization (2-level max)
+```
+docs/
+├── README.md              # 主页（欢迎页）
+├── _sidebar.md            # 全局侧边栏导航
+├── getting-started.md     # 入门指南
+├── dashboard.md           # 链接仪表盘（政府服务、标准、工具等）
+├── 01-policies/           # 公司政策
+├── 02-commercial/         # 商务流程（采购、合同等）
+├── 03-TBC/                # 待定内容
+├── 04-procedures/         # 操作规程（详细步骤）
+│   ├── buildertrend/      # BuilderTrend 工作流程
+│   ├── fieldwire/         # Fieldwire 使用指南
+│   └── googleservice/     # Google 服务使用说明
+├── 05-quality/            # 质量管理
+├── 06-safety/             # 安全管理
+├── 07-knowledge-base/     # 知识库（技术参考、FAQ）
+│   ├── dev/               # 开发流程知识
+│   ├── technical/         # 技术知识
+│   └── geeks/             # 技术工具指南
+├── 08-templates/          # 可重用表单和模板
+└── 11-assets/             # 静态资源
 ```
 
-### Key Configuration (`index.html`)
+**Folder Conventions**:
+- Folders are numbered with two-digit prefixes (e.g., `01-policies`)
+- Every folder MUST contain a `README.md` as the default landing page
+- Maximum 2-level nesting enforced by Docsify and project standards
 
-**Docsify settings:**
-- `basePath: '/docs/'` - All content served from docs folder
-- `loadSidebar: true` - Enables `_sidebar.md`
-- `alias: { '/.*/_sidebar.md': '/_sidebar.md' }` - Global sidebar reuse
-- `subMaxLevel: 2` - Two-level table of contents (enforced limit)
-- `search: { paths: 'auto' }` - Full-text search
-
-**Theme system:**
-- Light/Dark stylesheets loaded via `prefers-color-scheme` media query
-- Manual toggle switch (top-right) overrides system preference
-- Theme preference stored in `localStorage` (`preferred-theme`)
-- Mermaid diagrams re-render on theme change with optimized dark mode colors
-
-**Mermaid integration:**
-- Loaded as UMD module before `docsify-mermaid` plugin
-- `initMermaidWithTheme(dark)` function handles theme-specific config
-- Dark theme uses enhanced contrast (white strokes, custom backgrounds)
-- Diagrams marked with `.mermaid` class are auto-processed
-
-## Sidebar Rules (`_sidebar.md`)
-
-Critical constraints for sidebar editing:
-
-1. **Two-level maximum hierarchy** (enforced by Docsify config)
-   ```markdown
-   - Root Level Heading (no link)
-     - [Sub Item](path/to/file)
-   ```
-
-2. **README.md as folder default**
-   - Link to folder path automatically loads `README.md`
-   - Every second-level folder MUST have `README.md` with heading
-   ```markdown
-   - [Section](/section/)  ← Loads section/README.md
-   ```
-
-3. **Link format**
-   - Omit `.md` extension: `[Title](path/file)` not `[Title](path/file.md)`
-   - Paths relative to `basePath` (`/docs/`)
-
-4. **Folder naming**
-   - Number prefixes for ordering: `01-policies/`, `02-commercial/`
-
-## Content Guidelines
-
-### Documentation standards
-- Write in **clean, professional Markdown** with clear cross-links
-- Maintain consistency across:
-  - Filing systems
-  - Revision naming conventions
-  - Document indexing
-- Use proper headings hierarchy (`#`, `##`, `###`)
-- Include descriptive link text (avoid "click here")
-
-### Organizational conventions
-- **Folder structure**: Use numbered prefixes for ordering (`01-`, `02-`, etc.)
-- **Assets management**: Store images, diagrams, and external references in `/docs/11-assets/` or category-specific asset folders
-- **README requirement**: Every second-level folder MUST have `README.md` with section heading
-- **Cross-company support**: Structure should accommodate both SAIYU Construction and PSEC Project Services
-
-### Language conventions
-- UI text and user-facing content: **English**
-- Source code comments (JS/CSS): **Chinese** (only when modifying code, which should be rare)
-- Documentation language: **English**
-
-### Markdown features
-- Standard GitHub-flavored Markdown
-- Mermaid diagrams in fenced code blocks:
-  ````markdown
-  ```mermaid
-  graph TD
-    A[Start] --> B[End]
+### Sidebar Rules (from `sidebar_rule.md`)
+- First-level headings are category names (no links)
+- Maximum 2 levels of hierarchy
+- Link format: `[Display Name](path/to/file)` (`.md` extension can be omitted)
+- Linking to folders automatically loads `README.md`
+- Example:
+  ```markdown
+  - Policies
+    - [Company Policies](01-policies/company-policies)
+    - [Safety Guidelines](01-policies/safety-guidelines)
   ```
-  ````
-- Image zoom plugin enabled (click images to enlarge)
-- Use relative links for internal navigation
 
-## Theme Implementation
+## Development Workflow
 
-The custom theme toggle works through:
+### Local Development
+```bash
+# 安装 Docsify CLI（首次）
+npm install -g docsify-cli
 
-1. **Detection priority**: `localStorage` override > system preference
-2. **Stylesheet switching**: Modifies `<link>` media attributes (`all` vs `not all`)
-3. **Mermaid sync**: `reinitMermaid(dark)` re-initializes diagrams
-4. **Persistence**: Auto-reload after manual toggle to ensure clean state
+# 启动开发服务器（默认端口 3000）
+docsify serve .
 
-Functions in `index.html`:
-- `getCurrentTheme()` - Returns active theme ('light'|'dark')
-- `applyTheme(theme)` - Switches stylesheets and updates localStorage
-- `initMermaidWithTheme(dark)` - Configures Mermaid colors
-- `reinitMermaid(dark)` - Clears processed diagrams and re-renders
+# 指定端口
+docsify serve . --port 8080
 
-## Deployment
-
-Hosted on Vercel with SPA routing:
-```json
-{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+# 后台运行
+nohup docsify serve . &
 ```
 
-All routes serve `index.html`, letting Docsify handle client-side routing.
+### Content Editing
+- Markdown 文件修改后浏览器自动刷新
+- `index.html` 修改需手动刷新浏览器
+- 内部链接（如 `[Home](/)`）因 `basePath: '/docs/'` 会指向 `docs/README.md`
+
+### Theme Customization
+All custom styles are embedded in `index.html` `<style>` block:
+- Sidebar compact styles (reduced padding/margins)
+- Mermaid dark theme contrast optimization
+- Theme toggle switch styles (fixed top-right position)
+
+## Document Authoring Standards
+
+### Language Conventions
+- **UI components and user-facing text**: English
+- **Source code comments**: Chinese (中文)
+- **Function-level documentation**: Always add when generating code
+
+### Markdown Best Practices
+- Use Mermaid for flowcharts, sequence diagrams, etc.
+- Use standard Markdown for text content
+- Follow Docsify's link conventions (omit `.md` extension)
+- Use `README.md` as folder index pages
+
+### Dashboard Pattern
+The `dashboard.md` file contains categorized quick links to external services with embedded credentials. Format:
+```markdown
+## Category Name
+- [Service Name](url) `acc: email@example.com` `p/w: password`
+```
 
 ## Common Tasks
 
-### Adding new documentation
-1. Create `.md` file in appropriate `docs/XX-category/` folder
-2. Add entry to `docs/_sidebar.md` (respect 2-level limit)
-3. Ensure parent folder has `README.md` with section heading
-4. Use clear, descriptive headings and proper Markdown formatting
-5. Add cross-links to related documents where relevant
+### Adding New Documentation
+1. Create Markdown file in appropriate numbered folder under `docs/`
+2. Add entry to `docs/_sidebar.md` following hierarchy rules
+3. Test locally with `docsify serve .`
 
-### Organizing assets
-- Images: Place in `docs/11-assets/images/` or category-specific subfolder
-- Diagrams: Create as Mermaid code blocks when possible; use `docs/11-assets/diagrams/` for external files
-- Reference images from Markdown: `![Alt text](../11-assets/images/filename.png)`
+### Creating New Section
+1. Create numbered folder under `docs/` (e.g., `09-new-section/`)
+2. Add `README.md` with section heading
+3. Update `docs/_sidebar.md` with new category and links
+4. Follow 2-level maximum nesting
 
-### Proposing structure changes
-When suggesting folder reorganization or naming conventions:
-1. Explain rationale for the proposed structure
-2. Show how it supports both SAIYU and PSEC workflows
-3. Ensure compatibility with 2-level sidebar constraint
-4. Consider migration path for existing content
+### Using Wikilinks
+1. **Basic Syntax**: `[[Page Name]]` - links to page in same directory
+2. **Custom Display**: `[[Page Name|Link Text]]` - shows custom text
+3. **Section Links**: `[[Page Name#section]]` - links to specific section
+4. **Viewing Graph**: Click "Graph View" button (top-right) to see relationships
+5. **Sample Files**: Check `/docs/07-knowledge-base/Vault/Sample Vault/` for examples
 
-### Adding diagrams
-Use Mermaid syntax in Markdown - no special setup required:
-````markdown
-```mermaid
-sequenceDiagram
-  Client->>Server: Request
-  Server-->>Client: Response
-```
-````
+### Modifying Theme/Configuration
+- Edit `index.html` for Docsify config or custom styles
+- Theme switch logic is in embedded `<script>` tags
+- Mermaid config changes require testing both light and dark themes
+- Graph view colors defined in `/docs/assets/css/wikilink-graph.css`
 
-### Modifying theme (rare - requires explicit request)
-- Light theme: `theme-simple.css` styles
-- Dark theme: `theme-simple-dark.css` styles
-- Mermaid dark optimizations: Media query in `<style>` block (index.html:27-37)
-- Toggle switch styling: `.theme-switch` classes (index.html:40-79)
-- **Remember**: Do NOT modify `index.html` unless explicitly requested
+### Deployment
+- Vercel automatically deploys from main branch
+- `vercel.json` handles SPA routing (all routes → `index.html`)
+- No build step required (client-side rendering)
+
+## Git Workflow
+
+**Current branch**: `main`
+**Deployment**: Auto-deploy from main branch to Vercel
+
+### Recent Changes
+- **Added Wikilinks & Graph View** (2025-10-09): Obsidian-style [[wikilinks]] with interactive D3.js force-directed graph visualization
+- Replaced legacy project rules with this CLAUDE.md
+- Updated dashboard with Squarespace credentials
+- Updated PSEC timesheet documentation
+
+## Special Considerations
+
+### Credentials Management
+- Dashboard contains embedded credentials for internal services
+- **IMPORTANT**: Never commit credential changes to public repositories
+- Consider separating credentials if repo becomes public
+
+### Theme System
+- Manual theme preference overrides system preference
+- `localStorage.preferred-theme` stores user choice
+- Page reload ensures complete style application after manual switch
+- Mermaid diagrams re-render with theme-appropriate colors
+
+### Browser Compatibility
+- All resources loaded from CDN (jsdelivr, unpkg)
+- Requires JavaScript enabled
+- Modern browser required for CSS custom properties and ES6+ features
