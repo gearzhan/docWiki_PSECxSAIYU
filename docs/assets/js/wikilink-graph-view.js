@@ -49,6 +49,31 @@
   }
 
   /**
+   * 图力学配置（参考 Obsidian）
+   * Graph force configuration (inspired by Obsidian)
+   */
+  const FORCE_CONFIG = {
+    // 向心力：拉向中心的强度 (0.0 - 1.0)
+    centerForce: 0.01,
+
+    // 排斥力：节点间排斥强度 (-3000 到 0, 负值越大排斥越强)
+    repelForce: -3000,
+
+    // 链接力：链接拉力强度 (0.0 - 1.0)
+    linkForce: 0.2,
+
+    // 链接距离：链接的理想长度 (像素)
+    linkDistance: 220,
+
+    // 碰撞半径：防止节点重叠
+    collisionRadius: 30,
+
+    // 孤立节点径向力：将无连接节点保持在合理范围内
+    radialForceStrength: 2.0,
+    radialForceRadius: 500
+  };
+
+  /**
    * 获取主题相关的颜色配置（Obsidian风格）
    * Get theme-related color configuration (Obsidian style)
    */
@@ -137,12 +162,34 @@
     const currentPath = window.location.hash.substring(2);
     const currentId = currentPath.toLowerCase().replace(/^\/+|\/+$/g, '').replace(/\.md$/i, '').replace(/\s+/g, '-').replace(/[^\w\-\/]/g, '');
 
-    // 创建力模拟（Obsidian风格：较强的排斥力，较长的连接距离）
+    // 创建力模拟（Obsidian 风格四力模型）
+    // Create force simulation (Obsidian-style four-force model)
     simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(d => d.id).distance(150))
-      .force('charge', d3.forceManyBody().strength(-800))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(40));
+      // Link Force: 链接拉力
+      .force('link', d3.forceLink(links)
+        .id(d => d.id)
+        .distance(FORCE_CONFIG.linkDistance)
+        .strength(FORCE_CONFIG.linkForce))
+
+      // Repel Force: 节点排斥力
+      .force('charge', d3.forceManyBody()
+        .strength(FORCE_CONFIG.repelForce))
+
+      // Center Force: 向心力
+      .force('center', d3.forceCenter(width / 2, height / 2)
+        .strength(FORCE_CONFIG.centerForce))
+
+      // Collision: 碰撞检测（防止节点重叠）
+      .force('collision', d3.forceCollide()
+        .radius(FORCE_CONFIG.collisionRadius))
+
+      // Radial Force: 对孤立节点施加径向约束力
+      // 防止无连接节点飘离太远
+      .force('radial', d3.forceRadial(
+        d => d.connections === 0 ? FORCE_CONFIG.radialForceRadius : 0,
+        width / 2,
+        height / 2
+      ).strength(d => d.connections === 0 ? FORCE_CONFIG.radialForceStrength : 0));
 
     // 绘制连接线（Obsidian风格：曲线）
     linkSelection = g.append('g')
