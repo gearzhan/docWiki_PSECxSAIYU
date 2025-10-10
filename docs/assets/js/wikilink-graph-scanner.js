@@ -156,6 +156,70 @@
   }
 
   /**
+   * 解析markdown内容提取标准Markdown链接
+   * Parse markdown content to extract standard markdown links
+   * @param {string} content - Markdown文件内容
+   * @returns {Array<{text: string, path: string}>} - 链接对象数组
+   */
+  function parseMarkdownLinks(content) {
+    // 匹配 [text](path.md) 格式，排除外部链接（http/https）
+    const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+\.md)\)/g;
+    const links = [];
+    let match;
+
+    while ((match = markdownLinkRegex.exec(content)) !== null) {
+      const text = match[1];
+      const path = match[2];
+
+      // 排除外部链接（以 http:// 或 https:// 开头）
+      if (!path.match(/^https?:\/\//i)) {
+        links.push({
+          text: text.trim(),
+          path: path.trim()
+        });
+      }
+    }
+
+    return links;
+  }
+
+  /**
+   * 解析相对路径（处理 ../ 和 ./ 导航）
+   * Resolve relative path from current file path
+   * @param {string} currentPath - 当前文件完整路径（如 /07-knowledge-base/Vault/SafeWorkCode/WHS-Framework/04-Specific-Hazard-Management/Construction-Work.md）
+   * @param {string} relativePath - 相对路径（如 ../../code of practice/construction_work.md）
+   * @returns {string} - 解析后的绝对路径
+   */
+  function resolvePath(currentPath, relativePath) {
+    // 解码URL编码的字符（如 %20 -> 空格）
+    const decodedPath = decodeURIComponent(relativePath);
+
+    // 获取当前文件所在目录（移除文件名）
+    const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/'));
+
+    // 将相对路径按 / 分割
+    const parts = decodedPath.split('/').filter(p => p);
+    const dirParts = currentDir.split('/').filter(p => p);
+
+    // 处理每个路径部分
+    for (const part of parts) {
+      if (part === '..') {
+        // 上级目录：移除最后一个目录
+        dirParts.pop();
+      } else if (part === '.') {
+        // 当前目录：忽略
+        continue;
+      } else {
+        // 普通目录或文件：添加到路径
+        dirParts.push(part);
+      }
+    }
+
+    // 重新组合为绝对路径（以 / 开头）
+    return '/' + dirParts.join('/');
+  }
+
+  /**
    * 获取页面分类（基于路径）
    * Get page category based on path
    */
@@ -255,47 +319,136 @@
     const vaultPath = window.wikiGraphConfig.includePaths[0];
     const basePath = '/' + vaultPath + '/';
 
-    // 并发扫描所有文件（Scan all files concurrently）
+    // ============================================================
+    // 第一步：建立文件名到路径的映射表（解决跨目录引用问题）
+    // Step 1: Build filename-to-path lookup table (resolve cross-directory references)
+    // ============================================================
+    const fileNameToPath = new Map();
+
+    index.files.forEach((filePath) => {
+      const fileName = filePath.split('/').pop().replace(/\.md$/i, '');
+      const fullPath = basePath + filePath;
+      const fileId = pathToId(fullPath);
+
+      // 存储映射：文件名（小写） -> { fullPath, fileId, label }
+      fileNameToPath.set(fileName.toLowerCase(), {
+        fullPath: fullPath,
+        fileId: fileId,
+        label: decodeURIComponent(fileName)
+      });
+    });
+
+    console.log(`Built lookup table with ${fileNameToPath.size} files`);
+
+    // ============================================================
+    // 第二步：并发扫描所有文件并建立链接关系
+    // Step 2: Scan all files concurrently and build link relationships
+    // ============================================================
     const scanPromises = index.files.map(async (filePath) => {
       const fullPath = basePath + filePath;
       const fileId = pathToId(fullPath);
       const fileName = filePath.split('/').pop().replace(/\.md$/i, '');
       const label = decodeURIComponent(fileName);
 
-      // 添加节点（Add node）
+      // 添加源节点
       addNode(fileId, label, fullPath);
 
-      // 获取文件内容（Fetch file content）
+      // 获取文件内容
       const content = await fetchMarkdownContent(fullPath);
       if (!content) return;
 
-      // 提取 wikilinks（Extract wikilinks）
+      // ============================================================
+      // 第一部分：处理 Wikilinks（[[...]] 格式）
+      // Part 1: Process wikilinks ([[...]] format)
+      // ============================================================
       const wikilinks = parseWikilinks(content);
 
-      // 处理每个 wikilink（Process each wikilink）
       wikilinks.forEach(targetName => {
-        const currentDir = fullPath.substring(0, fullPath.lastIndexOf('/'));
-        const targetPath = `${currentDir}/${targetName}`;
-        const targetId = pathToId(targetPath);
+        // 规范化目标名称（移除空格、转小写）
+        const targetKey = targetName.toLowerCase().trim();
 
-        // 添加目标节点（Add target node）
-        addNode(targetId, targetName, targetPath);
+        // 从查找表中查找目标文件
+        const targetInfo = fileNameToPath.get(targetKey);
 
-        // 添加链接（Add link）
-        addLink(fileId, targetId);
+        if (targetInfo) {
+          // ✅ 找到目标文件，使用正确的完整路径
+          const { fullPath: targetPath, fileId: targetId, label: targetLabel } = targetInfo;
+
+          // 确保目标节点存在（虽然第一步已添加，但保持幂等性）
+          addNode(targetId, targetLabel, targetPath);
+
+          // 添加链接（双向增加 connections）
+          addLink(fileId, targetId);
+        } else {
+          // ⚠️ 未找到目标文件（可能是拼写错误、跨 Vault 引用或待创建页面）
+          console.warn(`[Scan] Wikilink target not found: "${targetName}" (from ${fileName})`);
+
+          // 仍然创建"幽灵节点"（虚线显示，标记为不存在）
+          const currentDir = fullPath.substring(0, fullPath.lastIndexOf('/'));
+          const targetPath = `${currentDir}/${targetName}`;
+          const targetId = pathToId(targetPath);
+
+          addNode(targetId, targetName, targetPath);
+          addLink(fileId, targetId);
+        }
+      });
+
+      // ============================================================
+      // 第二部分：处理标准 Markdown 链接（[text](path.md) 格式）
+      // Part 2: Process standard markdown links ([text](path.md) format)
+      // ============================================================
+      const markdownLinks = parseMarkdownLinks(content);
+
+      markdownLinks.forEach(link => {
+        // 解析相对路径为绝对路径
+        const resolvedPath = resolvePath(fullPath, link.path);
+        const targetId = pathToId(resolvedPath);
+
+        // 从路径提取文件名作为 label
+        const targetFileName = resolvedPath.split('/').pop().replace(/\.md$/i, '');
+        const targetLabel = decodeURIComponent(targetFileName);
+
+        // 尝试从查找表中查找（优先使用已知路径）
+        const targetKey = targetFileName.toLowerCase();
+        const targetInfo = fileNameToPath.get(targetKey);
+
+        if (targetInfo) {
+          // ✅ 在查找表中找到（使用正确的完整路径和 label）
+          const { fullPath: knownPath, fileId: knownId, label: knownLabel } = targetInfo;
+          addNode(knownId, knownLabel, knownPath);
+          addLink(fileId, knownId);
+        } else {
+          // ⚠️ 未在查找表中找到（可能是跨 Vault 链接或文件不存在）
+          // 仍然创建节点并添加链接
+          addNode(targetId, targetLabel, resolvedPath);
+          addLink(fileId, targetId);
+        }
       });
     });
 
-    // 等待所有扫描完成（Wait for all scans to complete）
+    // 等待所有扫描完成
     await Promise.all(scanPromises);
 
     console.log(`Vault scan complete: ${window.wikiGraphData.nodes.size} nodes, ${window.wikiGraphData.links.length} links`);
 
-    // 更新缓存状态（Update cache state）
+    // ============================================================
+    // 调试输出：显示连接最多的前 10 个节点
+    // Debug: Show top 10 most connected nodes
+    // ============================================================
+    const topNodes = Array.from(window.wikiGraphData.nodes.values())
+      .sort((a, b) => b.connections - a.connections)
+      .slice(0, 10);
+
+    console.log('Top 10 connected nodes:');
+    topNodes.forEach((node, index) => {
+      console.log(`  ${index + 1}. ${node.label}: ${node.connections} connections`);
+    });
+
+    // 更新缓存状态
     vaultGraphCache.scanned = true;
     vaultGraphCache.lastScan = Date.now();
 
-    // 触发图更新事件（Trigger graph update event）
+    // 触发图更新事件
     window.dispatchEvent(new CustomEvent('wikiGraphUpdated', {
       detail: window.wikiGraphData
     }));
