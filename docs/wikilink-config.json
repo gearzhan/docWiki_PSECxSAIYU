@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "description": "Configuration for wikilink graph view and index generation",
+  "indexFolders": [
+    "docs/07-knowledge-base/Vault"
+  ],
+  "comments": {
+    "indexFolders": "List of folders that should have auto-generated _index.json files. Paths are relative to project root."
+  }
+}

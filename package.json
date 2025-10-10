@@ -1,0 +1,25 @@
+{
+  "name": "docwiki-psec-saiyu",
+  "version": "1.0.0",
+  "description": "Documentation wiki for PSEC Project Services and SAIYU Construction",
+  "scripts": {
+    "update-index": "bash scripts/update-index.sh",
+    "serve": "docsify serve .",
+    "serve:port": "docsify serve . --port 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/docWiki_PSECxSAIYU.git"
+  },
+  "keywords": [
+    "documentation",
+    "docsify",
+    "wiki",
+    "wikilinks"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "docsify-cli": "^4.4.4"
+  }
+}

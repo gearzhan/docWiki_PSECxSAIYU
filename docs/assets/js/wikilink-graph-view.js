@@ -178,7 +178,9 @@
       .attr('class', 'node-circle')
       .attr('r', d => {
         const baseSize = Math.sqrt(d.connections + 1) * 5;
-        return Math.max(5, Math.min(20, baseSize));
+        const radius = Math.max(5, Math.min(20, baseSize));
+        d.radius = radius;  // 存储原始半径（Store original radius）
+        return radius;
       })
       .attr('fill', d => d.id === currentId ? colors.currentNodeFill : getNodeColor(d.category, colors))
       .attr('stroke', d => d.id === currentId ? colors.currentNodeStroke : colors.nodeStroke)
@@ -190,10 +192,7 @@
           .attr('fill', d.id === currentId ? colors.currentNodeFill : colors.hoverFill)
           .transition()
           .duration(200)
-          .attr('r', function() {
-            const r = parseFloat(d3.select(this).attr('r'));
-            return r * 1.3;
-          });
+          .attr('r', d.radius * 1.3);  // 使用存储的半径（Use stored radius）
 
         // 高亮相关连接线（Highlight related links）
         link
@@ -212,10 +211,7 @@
           .attr('fill', d.id === currentId ? colors.currentNodeFill : getNodeColor(d.category, colors))
           .transition()
           .duration(200)
-          .attr('r', function() {
-            const r = parseFloat(d3.select(this).attr('r'));
-            return r / 1.3;
-          });
+          .attr('r', d.radius);  // 使用存储的半径（Use stored radius）
 
         // 恢复连接线（Restore links）
         link
@@ -223,9 +219,8 @@
           .attr('stroke-width', 1.5)
           .attr('opacity', 0.6);
 
-        // 隐藏小节点标签（Hide labels for small nodes）
+        // 恢复标签样式（Restore label style）
         d3.select(this.parentNode).select('.node-label')
-          .attr('opacity', d.connections > 2 ? 1 : 0)
           .attr('font-weight', 400);
       })
       .on('click', function(event, d) {
@@ -240,15 +235,12 @@
       .attr('class', 'node-label')
       .text(d => d.label)
       .attr('x', 0)
-      .attr('y', d => {
-        const r = Math.sqrt(d.connections + 1) * 5;
-        return -Math.max(5, Math.min(20, r)) - 8;
-      })
+      .attr('y', d => -d.radius - 8)  // 使用存储的半径（Use stored radius）
       .attr('text-anchor', 'middle')
       .attr('font-size', '13px')
       .attr('font-weight', 400)
       .attr('pointer-events', 'none')
-      .attr('opacity', d => d.id === currentId || d.connections > 2 ? 1 : 0)
+      .attr('opacity', 1)  // 始终显示标签（Always show labels）
       .style('user-select', 'none')
       .each(function(d) {
         // 添加描边以提高可读性（Add stroke for readability）
@@ -260,13 +252,13 @@
           .attr('class', 'node-label-bg')
           .text(text)
           .attr('x', 0)
-          .attr('y', label.attr('y'))
+          .attr('y', -d.radius - 8)  // 使用存储的半径（Use stored radius）
           .attr('text-anchor', 'middle')
           .attr('font-size', '13px')
           .attr('font-weight', 400)
           .attr('stroke', colors.textStroke)
           .attr('stroke-width', 3)
-          .attr('opacity', label.attr('opacity'))
+          .attr('opacity', 1)  // 始终显示（Always visible）
           .attr('pointer-events', 'none')
           .style('user-select', 'none');
 
