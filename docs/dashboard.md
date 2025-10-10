@@ -4,7 +4,7 @@
 
 ?> **PSEC Account Policy:** From August 2025 onward, all new applications and account registrations for Government & Regulatory services should use the designated PSEC corporate account. `acc: info@psecprojects.com.au` `p/w: Psec02580258!`
 
-- [NSW Planning Portal](https://www.planningportal.nsw.gov.au/) `acc: info@psecprojects.com.au` `p/w: 0258_cesP!`
+- [NSW Planning Portal](https://www.planningportal.nsw.gov.au/) `acc: info@psecprojects.com.au` `p/w: 0258_cesP`
 - [NSW Spatial Services SDT Explorer](https://portal.spatial.nsw.gov.au/explorer/index.html)
 - [NSW Strata Search](https://www.nsw.gov.au/housing-and-construction/strata/strata-search)
 - [Contractor Licence Verify](https://verify.licence.nsw.gov.au/home/Trades)
@@ -35,3 +35,4 @@
 
 ## Other
  - [Squarespace.](https://www.squarespace.com/) `info@psecprojects.com.au` `psec0258`
+ - Adobe Account : `info@psecprojects.com.au` `Adobe0258#`
