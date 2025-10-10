@@ -145,7 +145,7 @@
       .force('collision', d3.forceCollide().radius(40));
 
     // 绘制连接线（Obsidian风格：曲线）
-    const link = g.append('g')
+    linkSelection = g.append('g')
       .attr('class', 'links')
       .selectAll('line')
       .data(links)
@@ -155,7 +155,7 @@
       .attr('opacity', 0.6);
 
     // 绘制节点
-    const node = g.append('g')
+    nodeSelection = g.append('g')
       .attr('class', 'nodes')
       .selectAll('g')
       .data(nodes)
@@ -163,7 +163,7 @@
       .call(drag(simulation));
 
     // 节点外发光效果（Node glow effect）
-    node.append('circle')
+    nodeSelection.append('circle')
       .attr('r', d => {
         const baseSize = Math.sqrt(d.connections + 1) * 6;
         return Math.max(6, Math.min(25, baseSize));
@@ -174,7 +174,7 @@
       .attr('opacity', 0.3);
 
     // 节点主体（Node main body）
-    node.append('circle')
+    nodeSelection.append('circle')
       .attr('class', 'node-circle')
       .attr('r', d => {
         const baseSize = Math.sqrt(d.connections + 1) * 5;
@@ -195,7 +195,7 @@
           .attr('r', d.radius * 1.3);  // 使用存储的半径（Use stored radius）
 
         // 高亮相关连接线（Highlight related links）
-        link
+        linkSelection
           .attr('stroke', l => (l.source.id === d.id || l.target.id === d.id) ? colors.linkStrokeHover : colors.linkStroke)
           .attr('stroke-width', l => (l.source.id === d.id || l.target.id === d.id) ? 2.5 : 1.5)
           .attr('opacity', l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.3);
@@ -214,7 +214,7 @@
           .attr('r', d.radius);  // 使用存储的半径（Use stored radius）
 
         // 恢复连接线（Restore links）
-        link
+        linkSelection
           .attr('stroke', colors.linkStroke)
           .attr('stroke-width', 1.5)
           .attr('opacity', 0.6);
@@ -231,7 +231,7 @@
 
     // 节点标签（带描边以提高可读性）
     // Node labels (with stroke for better readability)
-    node.append('text')
+    nodeSelection.append('text')
       .attr('class', 'node-label')
       .text(d => d.label)
       .attr('x', 0)
@@ -268,13 +268,13 @@
 
     // 更新位置
     simulation.on('tick', () => {
-      link
+      linkSelection
         .attr('x1', d => d.source.x)
         .attr('y1', d => d.source.y)
         .attr('x2', d => d.target.x)
         .attr('y2', d => d.target.y);
 
-      node
+      nodeSelection
         .attr('transform', d => `translate(${d.x},${d.y})`);
     });
 
@@ -350,16 +350,75 @@
     }, 300);
   }
 
+  // 存储节点和链接选择以支持搜索（Store node and link selections for search support）
+  let nodeSelection = null;
+  let linkSelection = null;
+  let currentSearchQuery = '';
+
   /**
-   * 重置缩放
-   * Reset zoom
+   * 搜索并高亮节点
+   * Search and highlight nodes
    */
-  window.resetGraphZoom = function() {
-    if (svg) {
-      const d3 = window.d3;
-      svg.transition()
-        .duration(750)
-        .call(d3.zoom().transform, d3.zoomIdentity);
+  function searchNodes(query) {
+    if (!nodeSelection || !linkSelection) return;
+
+    currentSearchQuery = query.toLowerCase().trim();
+
+    if (!currentSearchQuery) {
+      // 清空搜索，恢复所有节点（Clear search, restore all nodes）
+      nodeSelection.selectAll('.node-circle')
+        .attr('opacity', 1);
+      nodeSelection.selectAll('.node-label, .node-label-bg')
+        .attr('opacity', 1);
+      linkSelection
+        .attr('opacity', 0.6);
+
+      // 更新搜索计数（Update search count）
+      const searchCount = document.querySelector('.search-count');
+      if (searchCount) searchCount.textContent = '';
+      return;
+    }
+
+    // 查找匹配的节点（Find matching nodes）
+    const matchingNodes = new Set();
+    nodeSelection.each(function(d) {
+      if (d.label.toLowerCase().includes(currentSearchQuery)) {
+        matchingNodes.add(d.id);
+      }
+    });
+
+    // 高亮匹配的节点，降低其他节点透明度（Highlight matching nodes, dim others）
+    nodeSelection.selectAll('.node-circle')
+      .attr('opacity', d => matchingNodes.has(d.id) ? 1 : 0.2);
+
+    nodeSelection.selectAll('.node-label, .node-label-bg')
+      .attr('opacity', d => matchingNodes.has(d.id) ? 1 : 0.2)
+      .attr('font-weight', d => matchingNodes.has(d.id) ? 600 : 400);
+
+    // 高亮匹配节点之间的连接（Highlight links between matching nodes）
+    linkSelection
+      .attr('opacity', l => {
+        const sourceMatch = matchingNodes.has(l.source.id);
+        const targetMatch = matchingNodes.has(l.target.id);
+        return (sourceMatch || targetMatch) ? 0.6 : 0.1;
+      });
+
+    // 更新搜索计数（Update search count）
+    const searchCount = document.querySelector('.search-count');
+    if (searchCount) {
+      searchCount.textContent = `${matchingNodes.size} match${matchingNodes.size !== 1 ? 'es' : ''}`;
+    }
+  }
+
+  /**
+   * 清空搜索
+   * Clear search
+   */
+  window.clearGraphSearch = function() {
+    const searchInput = document.getElementById('graph-search-input');
+    if (searchInput) {
+      searchInput.value = '';
+      searchNodes('');
     }
   };
 
@@ -421,7 +480,16 @@
         <div class="graph-header">
           <h2>Wikilink Graph View</h2>
           <div class="graph-controls">
-            <button onclick="resetGraphZoom()" title="Reset Zoom">🔍</button>
+            <span class="search-count"></span>
+            <div class="search-container">
+              <input
+                type="text"
+                id="graph-search-input"
+                placeholder="Search nodes..."
+                oninput="window.handleGraphSearch(this.value)"
+              />
+              <button class="search-clear-btn" onclick="clearGraphSearch()" title="Clear search">✕</button>
+            </div>
             <button onclick="closeWikilinkGraph()" title="Close">✕</button>
           </div>
         </div>
@@ -456,6 +524,7 @@
     // 全局函数
     window.showWikilinkGraph = showGraph;
     window.closeWikilinkGraph = closeGraph;
+    window.handleGraphSearch = searchNodes;
 
     // 监听路由变化，更新按钮可见性（Listen to route changes, update button visibility）
     window.addEventListener('hashchange', updateButtonVisibility);

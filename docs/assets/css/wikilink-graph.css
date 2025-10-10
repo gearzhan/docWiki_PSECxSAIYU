@@ -67,7 +67,8 @@
 /* 图控制按钮（Graph Controls） */
 .graph-controls {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  align-items: center;
 }
 
 .graph-controls button {
@@ -88,6 +89,65 @@
 
 .graph-controls button:active {
   transform: scale(0.95);
+}
+
+/* 搜索容器（Search Container） */
+.search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-container input {
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--mono-tint3, #ddd);
+  border-radius: 6px;
+  font-size: 14px;
+  width: 220px;
+  background: var(--base-background-color, #ffffff);
+  color: var(--base-color, #333);
+  transition: all 0.2s ease;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: var(--theme-color, #42b983);
+  box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.1);
+}
+
+.search-container input::placeholder {
+  color: var(--mono-shade1, #999);
+}
+
+/* 搜索清除按钮（Search Clear Button） */
+.search-clear-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent !important;
+  color: var(--mono-shade1, #999) !important;
+  padding: 4px 8px !important;
+  font-size: 14px;
+  opacity: 0.6;
+  min-width: auto !important;
+}
+
+.search-clear-btn:hover {
+  opacity: 1;
+  background: transparent !important;
+  transform: translateY(-50%) !important;
+}
+
+/* 搜索计数（Search Count） */
+.search-count {
+  font-size: 13px;
+  color: var(--theme-color, #42b983);
+  font-weight: 500;
+  white-space: nowrap;
+  margin-right: 12px;
+  min-width: 80px;
+  text-align: right;
 }
 
 /* 图容器（Graph Container） */
@@ -196,6 +256,21 @@
   .legend-circle {
     background: var(--node-color, #bb86fc);
     border-color: #ffffff;
+  }
+
+  .search-container input {
+    background: #3d3d3d;
+    color: #ffffff;
+    border-color: #555;
+  }
+
+  .search-container input:focus {
+    border-color: var(--theme-color, #42b983);
+    box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.2);
+  }
+
+  .search-clear-btn {
+    color: #aaa !important;
   }
 }
 
