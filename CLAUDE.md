@@ -56,14 +56,18 @@ window.$docsify = {
 
 **Wikilinks & Graph View**:
 - **Wikilink Syntax**: `[[Page Name]]` or `[[Page Name|Display Text]]` (Obsidian-style)
-- **Graph Scanner**: Automatically parses pages for wikilinks on navigation
+- **Pre-Scanning Mode**: Batch scans entire Vault on first entry using `_index.json` file list
+- **Graph Scanner**: Uses `Promise.all()` for concurrent file fetching and parsing
+- **Complete Network Discovery**: Shows all nodes including secondary connections (1-level deep from each node)
 - **Scoped Scanning**: Graph view limited to specific folders (configurable in `wikiGraphConfig`)
 - **Default Scope**: Only scans `docs/07-knowledge-base/Vault/` folder
+- **Cache Management**: Graph data cached after initial scan, cleared on scope exit
+- **Index File**: Static `_index.json` lists all .md files for efficient discovery
 - **Graph Data Structure**: Stored in `window.wikiGraphData` with nodes and links
 - **Force-Directed Layout**: D3.js simulation with drag, zoom, and click-to-navigate
-- **Theme-Aware Colors**: Graph colors adapt to light/dark theme automatically
-- **Node Sizing**: Node radius scales with number of connections (8-20px)
-- **Category Colors**: Different colors based on document folder (policies, commercial, etc.)
+- **Obsidian-Style Colors**: Unified gray color scheme (#5c5c5c light, #888 dark)
+- **Node Sizing**: Node radius scales with number of connections
+- **Always-Visible Labels**: All node labels displayed for better navigation
 - **Dynamic Button**: "Graph View" button only visible within scoped folders
 - **Auto-Clear**: Graph data cleared when navigating outside scope
 - **Keyboard Shortcut**: ESC key closes graph view
@@ -181,6 +185,41 @@ The `dashboard.md` file contains categorized quick links to external services wi
 4. **Viewing Graph**: Click "Graph View" button (top-right) to see relationships
 5. **Sample Files**: Check `/docs/07-knowledge-base/Vault/Sample Vault/` for examples
 
+### Configuring Graph View for New Folders
+1. **Edit Scanner Config** (`docs/assets/js/wikilink-graph-scanner.js`):
+   ```javascript
+   window.wikiGraphConfig = {
+     includePaths: [
+       '07-knowledge-base/Vault',
+       'your-new-folder'  // Add new path
+     ],
+     includePatterns: [
+       /^07-knowledge-base\/Vault/i,
+       /^your-new-folder/i  // Add regex pattern
+     ]
+   };
+   ```
+
+2. **Create Index File** (`your-new-folder/_index.json`):
+   ```json
+   {
+     "version": "1.0",
+     "generatedAt": "2025-01-09T12:00:00Z",
+     "files": [
+       "Page 01.md",
+       "Page 02.md",
+       "subfolder/Page 03.md"
+     ]
+   }
+   ```
+
+3. **Update Index**: When adding/removing files, regenerate `_index.json`:
+   ```bash
+   # From Vault root folder
+   find . -name "*.md" -type f | sed 's|^\./||' | sort > temp.txt
+   # Then manually format into JSON
+   ```
+
 ### Modifying Theme/Configuration
 - Edit `index.html` for Docsify config or custom styles
 - Theme switch logic is in embedded `<script>` tags
@@ -198,7 +237,13 @@ The `dashboard.md` file contains categorized quick links to external services wi
 **Deployment**: Auto-deploy from main branch to Vercel
 
 ### Recent Changes
-- **Added Wikilinks & Graph View** (2025-10-09): Obsidian-style [[wikilinks]] with interactive D3.js force-directed graph visualization
+- **Added Wikilinks & Graph View** (2025-10-09):
+  - Obsidian-style [[wikilinks]] with docsify-wikilink plugin
+  - Interactive D3.js force-directed graph visualization
+  - Pre-scanning mode with static index files for instant graph loading
+  - Complete network discovery (1-level deep from each node)
+  - Obsidian-style gray color scheme
+  - Cache management for performance optimization
 - Replaced legacy project rules with this CLAUDE.md
 - Updated dashboard with Squarespace credentials
 - Updated PSEC timesheet documentation

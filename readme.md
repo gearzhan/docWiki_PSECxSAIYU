@@ -15,6 +15,8 @@
 - 图片放大插件（`docsify@4/lib/plugins/zoom-image.min.js`）
 - Mermaid 图表（`mermaid@10` UMD）
 - docsify-mermaid 插件（`docsify-mermaid@2.0.1`）
+- docsify-wikilink（`docsify-wikilink@1`）- Obsidian 风格 [[wikilinks]] 支持
+- D3.js v7 - 力导向图可视化
 
 ## 关键配置与约定
 - `index.html` 中：
@@ -38,6 +40,8 @@
 - 修复样式片段中残留的 diff 标记，保证样式与脚本无语法问题。
 
 ## 新增功能
+
+### 主题切换
 - 左下角 Light/Dark 主题开关（toggle switch）：
   - 开关两侧显示文字 `light / dark`；
   - 手动切换后写入 `localStorage` 并强制刷新一次页面；
@@ -46,20 +50,50 @@
   - 如存在手动覆盖，系统主题变化将被忽略。
 - 暗色主题下的 Mermaid 对比度优化（线条、标签等视觉可读性增强）。
 
+### Wikilinks 与图谱视图
+- **[[Wikilink]] 语法支持**：
+  - 使用 `[[Page Name]]` 或 `[[Page Name|Display Text]]` 创建页面链接
+  - 自动生成 URL slug，支持同目录页面跳转
+  - Obsidian 兼容的 Markdown 语法
+
+- **交互式关系图谱**（Obsidian 风格）：
+  - D3.js 力导向图可视化所有页面关系
+  - 预扫描模式：进入 Vault 作用域时批量扫描所有文件
+  - 完整网络发现：显示所有节点及二级连接关系
+  - 智能缓存：后续导航使用缓存，性能优秀
+  - 作用域限制：仅在指定文件夹（如 `07-knowledge-base/Vault/`）启用
+  - 灰色主题配色，节点大小按连接数动态调整
+  - 支持缩放、平移、拖拽节点
+  - 点击节点直接跳转到对应页面
+  - ESC 键或 × 按钮关闭图谱
+
+- **技术实现**：
+  - 静态索引文件 `_index.json` 用于高效文件发现
+  - 并发扫描（`Promise.all()`）实现快速加载
+  - 主题感知，自动适配 light/dark 模式
+  - 响应式设计，支持移动端和桌面端
+
 ## 目录结构（节选）
 ```
 / (项目根)
-├── index.html           # Docsify 入口与配置、主题/脚本注入
-├── sidebar_rule.md      # 侧边栏编写规范
-├── readme.md            # 本说明文档（你正在阅读）
-└── docs/                # 文档根目录
+├── index.html                # Docsify 入口与配置、主题/脚本注入
+├── sidebar_rule.md           # 侧边栏编写规范
+├── README.md                 # 本说明文档（你正在阅读）
+├── CLAUDE.md                 # Claude Code 项目指南
+└── docs/                     # 文档根目录
     ├── README.md
     ├── _sidebar.md
-    ├── guide/README.md
-    ├── api/README.md
-    ├── faq/README.md
-    ├── about/about.md
-    └── tutorials/getting-started.md
+    ├── assets/               # 静态资源
+    │   ├── css/
+    │   │   └── wikilink-graph.css
+    │   └── js/
+    │       ├── wikilink-graph-scanner.js
+    │       └── wikilink-graph-view.js
+    ├── 07-knowledge-base/
+    │   └── Vault/            # Wiki 知识库（启用 wikilinks + 图谱）
+    │       ├── _index.json   # 文件索引
+    │       └── Sample Vault/ # 示例 Vault
+    └── [其他文档目录...]
 ```
 
 ## 本地开发
@@ -82,6 +116,43 @@ nohup docsify serve . & # 在后台运行
 - 修改 `index.html` 配置文件后，需要手动刷新浏览器
 
 ## 文档编写提示
-- 侧边栏编写规范请参阅根目录 `sidebar_rule.md`；
-- 因 `basePath` 为 `/docs/`，文内链接如 `[Home](/)` 会指向 `docs/README.md`；
+- 侧边栏编写规范请参阅根目录 `sidebar_rule.md`
+- 因 `basePath` 为 `/docs/`，文内链接如 `[Home](/)` 会指向 `docs/README.md`
+- 在 Vault 文件夹中使用 `[[Page Name]]` 创建 wikilinks
+- 添加新文件到 Vault 后，需更新 `_index.json` 以启用图谱扫描
+
+## 配置 Wikilinks 图谱
+要在新文件夹中启用 wikilinks 图谱功能：
+
+1. **配置作用域** - 编辑 `docs/assets/js/wikilink-graph-scanner.js`:
+   ```javascript
+   window.wikiGraphConfig = {
+     includePaths: [
+       '07-knowledge-base/Vault',
+       'your-new-folder/path'  // 添加新路径
+     ],
+     includePatterns: [
+       /^07-knowledge-base\/Vault/i,
+       /^your-new-folder\/path/i  // 添加对应正则
+     ]
+   };
+   ```
+
+2. **创建索引文件** - 在目标文件夹创建 `_index.json`:
+   ```json
+   {
+     "version": "1.0",
+     "generatedAt": "2025-01-09T12:00:00Z",
+     "files": [
+       "Page 01.md",
+       "Page 02.md"
+     ]
+   }
+   ```
+
+3. **使用 wikilinks** - 在 Markdown 文件中：
+   ```markdown
+   链接到其他页面：[[Page 01]]
+   自定义显示文字：[[Page 01|查看第一页]]
+   ```
 
