@@ -11,6 +11,7 @@
   'use strict';
 
   // 配置：限制图视图扫描的路径（Configuration: restrict graph scanning paths）
+  // 默认配置（在配置文件加载失败时使用）
   window.wikiGraphConfig = {
     // 只扫描这些路径下的wikilinks（Array of path patterns to include）
     includePaths: [
@@ -21,6 +22,40 @@
       /^07-knowledge-base\/Vault/i
     ]
   };
+
+  /**
+   * 从配置文件加载 includePaths
+   * Load includePaths from config file
+   */
+  async function loadConfigFromFile() {
+    try {
+      const basePath = window.$docsify.basePath || '/docs/';
+      const configPath = basePath + 'wikilink-config.json';
+
+      const response = await fetch(configPath);
+      if (!response.ok) {
+        console.warn('Wikilink config file not found, using defaults');
+        return;
+      }
+
+      const config = await response.json();
+      if (config.indexFolders && Array.isArray(config.indexFolders)) {
+        // 更新 includePaths（移除 docs/ 前缀，因为 basePath 已包含）
+        window.wikiGraphConfig.includePaths = config.indexFolders.map(
+          path => path.replace(/^docs\//, '')
+        );
+
+        // 更新正则表达式匹配模式
+        window.wikiGraphConfig.includePatterns = window.wikiGraphConfig.includePaths.map(
+          path => new RegExp('^' + path.replace(/\//g, '\\/'), 'i')
+        );
+
+        console.log('Wikilink config loaded:', window.wikiGraphConfig.includePaths);
+      }
+    } catch (error) {
+      console.error('Error loading wikilink config:', error);
+    }
+  }
 
   // 全局图数据结构（Global graph data structure）
   window.wikiGraphData = {
@@ -218,7 +253,7 @@
     }
 
     const vaultPath = window.wikiGraphConfig.includePaths[0];
-    const basePath = '/07-knowledge-base/Vault/';
+    const basePath = '/' + vaultPath + '/';
 
     // 并发扫描所有文件（Scan all files concurrently）
     const scanPromises = index.files.map(async (filePath) => {
@@ -359,10 +394,11 @@
         scanCurrentPage(hook, vm);
       });
 
-      // 初始化时重置图数据
-      hook.init(function() {
+      // 初始化时重置图数据并加载配置
+      hook.init(async function() {
         window.wikiGraphData.nodes.clear();
         window.wikiGraphData.links = [];
+        await loadConfigFromFile(); // 加载配置文件
         console.log('Wikilink Graph Scanner initialized');
       });
 
