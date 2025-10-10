@@ -49,28 +49,43 @@
   }
 
   /**
-   * 图力学配置（参考 Obsidian）
-   * Graph force configuration (inspired by Obsidian)
+   * 图力学配置（优化后的圆形布局）
+   * Graph force configuration (optimized for circular layout)
    */
   const FORCE_CONFIG = {
-    // 向心力：拉向中心的强度 (0.0 - 1.0)
-    centerForce: 0.01,
+    // 向心力：拉向中心的强度 (0.0 - 1.0) - 增强以形成圆形
+    centerForce: 0.5,
 
-    // 排斥力：节点间排斥强度 (-3000 到 0, 负值越大排斥越强)
-    repelForce: -3000,
+    // 排斥力：节点间排斥强度 (-3000 到 0, 负值越大排斥越强) - 减弱以让节点靠近
+    repelForce: -1800,
 
-    // 链接力：链接拉力强度 (0.0 - 1.0)
-    linkForce: 0.2,
+    // 链接力：链接拉力强度 (0.0 - 1.0) - 增强以让有连接的节点聚拢
+    linkForce: 0.3,
 
-    // 链接距离：链接的理想长度 (像素)
-    linkDistance: 220,
+    // 链接距离：链接的理想长度 (像素) - 缩短以形成更紧凑布局
+    linkDistance: 300,
 
-    // 碰撞半径：防止节点重叠
-    collisionRadius: 30,
+    // 碰撞半径：防止节点重叠（动态调整）
+    collisionRadius: 100,
+
+    // 全局径向力：轻微约束所有节点形成圆形
+    globalRadialStrength: 0.1,
+    globalRadialRadius: 10,
 
     // 孤立节点径向力：将无连接节点保持在合理范围内
-    radialForceStrength: 2.0,
-    radialForceRadius: 500
+    isolatedRadialStrength: 0.1,
+    isolatedRadialRadius: 10
+  };
+
+  /**
+   * 节点大小配置（指数增长）
+   * Node size configuration (exponential growth)
+   */
+  const NODE_SIZE_CONFIG = {
+    minRadius: 5,          // 最小半径（0个连接时）
+    maxRadius: 99,         // 最大半径（99个连接时）
+    maxConnections: 99,    // 最大连接数
+    growthRate: 0.05       // 增长速率系数（0.03=缓慢, 0.05=中等, 0.08=快速）
   };
 
   /**
@@ -90,6 +105,9 @@
       // 文字颜色（Text colors）
       textFill: isDark ? '#dcddde' : '#2e3338',
       textStroke: isDark ? '#1e1e1e' : '#ffffff',
+      // 降低灰度的文字颜色（Dimmed text colors for non-focused nodes）
+      dimmedTextFill: isDark ? 'rgba(220, 221, 222, 0.3)' : 'rgba(46, 51, 56, 0.3)',
+      dimmedTextStroke: isDark ? 'rgba(30, 30, 30, 0.3)' : 'rgba(255, 255, 255, 0.3)',
       // 高亮和悬停（Highlight and hover）
       highlightFill: isDark ? '#aaaaaa' : '#6a6a6a',
       hoverFill: isDark ? '#999999' : '#666666',
@@ -107,6 +125,32 @@
     // Obsidian 使用统一的灰色，不区分分类
     // Obsidian uses unified gray color, no category distinction
     return colors.nodeFill;
+  }
+
+  /**
+   * 计算节点半径（指数增长公式）
+   * Calculate node radius with exponential growth
+   *
+   * 公式：radius = min + (max - min) * (e^(k*x) - 1) / (e^(k*maxX) - 1)
+   *
+   * @param {number} connections - 连接数 (0-99+)
+   * @returns {number} radius - 节点半径 (5-40px)
+   */
+  function calculateNodeRadius(connections) {
+    const { minRadius, maxRadius, maxConnections, growthRate } = NODE_SIZE_CONFIG;
+
+    // 限制连接数到配置的最大值
+    const clampedConnections = Math.min(connections, maxConnections);
+
+    // 指数增长因子：(e^(k*x) - 1) / (e^(k*max) - 1)
+    const expGrowth = Math.exp(growthRate * clampedConnections) - 1;
+    const expMax = Math.exp(growthRate * maxConnections) - 1;
+    const normalizedGrowth = expGrowth / expMax;
+
+    // 映射到半径范围
+    const radius = minRadius + (maxRadius - minRadius) * normalizedGrowth;
+
+    return radius;
   }
 
   /**
@@ -162,8 +206,22 @@
     const currentPath = window.location.hash.substring(2);
     const currentId = currentPath.toLowerCase().replace(/^\/+|\/+$/g, '').replace(/\.md$/i, '').replace(/\s+/g, '-').replace(/[^\w\-\/]/g, '');
 
-    // 创建力模拟（Obsidian 风格四力模型）
-    // Create force simulation (Obsidian-style four-force model)
+    // 构建一度连接节点集合（Build first-degree connected nodes set）
+    const firstDegreeNodes = new Set();
+    firstDegreeNodes.add(currentId); // 包含当前节点自己（Include current node itself）
+
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+
+      if (sourceId === currentId || targetId === currentId) {
+        firstDegreeNodes.add(sourceId);
+        firstDegreeNodes.add(targetId);
+      }
+    });
+
+    // 创建力模拟（优化的圆形布局五力模型）
+    // Create force simulation (optimized circular layout with five forces)
     simulation = d3.forceSimulation(nodes)
       // Link Force: 链接拉力
       .force('link', d3.forceLink(links)
@@ -179,17 +237,24 @@
       .force('center', d3.forceCenter(width / 2, height / 2)
         .strength(FORCE_CONFIG.centerForce))
 
-      // Collision: 碰撞检测（防止节点重叠）
+      // Collision: 动态碰撞检测（基于节点大小防止重叠）
       .force('collision', d3.forceCollide()
-        .radius(FORCE_CONFIG.collisionRadius))
+        .radius(d => d.radius + 12))  // 动态调整碰撞半径
 
-      // Radial Force: 对孤立节点施加径向约束力
-      // 防止无连接节点飘离太远
-      .force('radial', d3.forceRadial(
-        d => d.connections === 0 ? FORCE_CONFIG.radialForceRadius : 0,
+      // Global Radial Force: 全局径向力，让所有节点趋向圆形分布
+      .force('radial-global', d3.forceRadial(
+        FORCE_CONFIG.globalRadialRadius,
         width / 2,
         height / 2
-      ).strength(d => d.connections === 0 ? FORCE_CONFIG.radialForceStrength : 0));
+      ).strength(FORCE_CONFIG.globalRadialStrength))
+
+      // Isolated Radial Force: 对孤立节点施加更强的径向约束力
+      // 防止无连接节点飘离太远
+      .force('radial-isolated', d3.forceRadial(
+        d => d.connections === 0 ? FORCE_CONFIG.isolatedRadialRadius : 0,
+        width / 2,
+        height / 2
+      ).strength(d => d.connections === 0 ? FORCE_CONFIG.isolatedRadialStrength : 0));
 
     // 绘制连接线（Obsidian风格：曲线）
     linkSelection = g.append('g')
@@ -199,7 +264,7 @@
       .join('line')
       .attr('stroke', colors.linkStroke)
       .attr('stroke-width', 1.5)
-      .attr('opacity', 0.6);
+      .attr('opacity', 0.2);  // 降低默认透明度：0.6 → 0.2
 
     // 绘制节点
     nodeSelection = g.append('g')
@@ -212,8 +277,8 @@
     // 节点外发光效果（Node glow effect）
     nodeSelection.append('circle')
       .attr('r', d => {
-        const baseSize = Math.sqrt(d.connections + 1) * 6;
-        return Math.max(6, Math.min(25, baseSize));
+        // 指数增长公式：外发光比主体大 1.2 倍
+        return calculateNodeRadius(d.connections) * 1.2;
       })
       .attr('fill', 'none')
       .attr('stroke', d => d.id === currentId ? colors.currentNodeStroke : colors.nodeStroke)
@@ -224,8 +289,8 @@
     nodeSelection.append('circle')
       .attr('class', 'node-circle')
       .attr('r', d => {
-        const baseSize = Math.sqrt(d.connections + 1) * 5;
-        const radius = Math.max(5, Math.min(20, baseSize));
+        // 指数增长公式：平滑增长从 0-99 连接
+        const radius = calculateNodeRadius(d.connections);
         d.radius = radius;  // 存储原始半径（Store original radius）
         return radius;
       })
@@ -239,7 +304,7 @@
           .attr('fill', d.id === currentId ? colors.currentNodeFill : colors.hoverFill)
           .transition()
           .duration(200)
-          .attr('r', d.radius * 1.3);  // 使用存储的半径（Use stored radius）
+          .attr('r', d.radius * 1.5);  // 优化：增加悬停放大倍数
 
         // 高亮相关连接线（Highlight related links）
         linkSelection
@@ -264,11 +329,15 @@
         linkSelection
           .attr('stroke', colors.linkStroke)
           .attr('stroke-width', 1.5)
-          .attr('opacity', 0.6);
+          .attr('opacity', 0.2);  // 恢复到降低的默认透明度
 
-        // 恢复标签样式（Restore label style）
-        d3.select(this.parentNode).select('.node-label')
+        // 恢复标签样式（Restore label style with focus-aware colors）
+        nodeSelection.selectAll('.node-label')
+          .attr('fill', node => firstDegreeNodes.has(node.id) ? colors.textFill : colors.dimmedTextFill)
           .attr('font-weight', 400);
+
+        nodeSelection.selectAll('.node-label-bg')
+          .attr('stroke', node => firstDegreeNodes.has(node.id) ? colors.textStroke : colors.dimmedTextStroke);
       })
       .on('click', function(event, d) {
         // 导航到页面
@@ -294,6 +363,11 @@
         const label = d3.select(this);
         const text = label.text();
 
+        // 判断是否为焦点节点（当前页面或一度连接）
+        const isFocused = firstDegreeNodes.has(d.id);
+        const labelFill = isFocused ? colors.textFill : colors.dimmedTextFill;
+        const labelStroke = isFocused ? colors.textStroke : colors.dimmedTextStroke;
+
         // 背景描边（Background stroke）
         d3.select(this.parentNode).insert('text', '.node-label')
           .attr('class', 'node-label-bg')
@@ -303,14 +377,14 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '13px')
           .attr('font-weight', 400)
-          .attr('stroke', colors.textStroke)
+          .attr('stroke', labelStroke)
           .attr('stroke-width', 3)
           .attr('opacity', 1)  // 始终显示（Always visible）
           .attr('pointer-events', 'none')
           .style('user-select', 'none');
 
         // 前景文字（Foreground text）
-        label.attr('fill', colors.textFill);
+        label.attr('fill', labelFill);
       });
 
     // 更新位置
